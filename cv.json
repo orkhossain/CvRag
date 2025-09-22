@@ -1,0 +1,235 @@
+{
+    "basics": {
+        "name": "Ork Hossain Muntaqin",
+        "title": "Mid Software Engineer (Full-Stack, DevOps, Cloud Architect)",
+        "location": "Prato, Italy",
+        "summary": "Full-stack and cloud engineer with experience in architecting Kubernetes clusters, modernizing runtimes, building CI/CD pipelines, payments modernization, AWS infrastructure, observability, and mentoring.",
+        "contacts": {
+            "phone": "+393209545277",
+            "email": "ork25.dev@gmail.com",
+            "linkedin": "LinkedIn",
+            "github": "GitHub",
+            "portfolio": "Portfolio"
+        }
+    },
+    "skills": [
+        "AWS",
+        "Pulumi",
+        "Firebase",
+        "Kubernetes",
+        "ArgoCD",
+        "React",
+        "Angular",
+        "Swift",
+        "Flutter",
+        "Next.js",
+        "Django",
+        "Node.js",
+        "FastAPI",
+        ".NET7",
+        "Flask",
+        "gRPC",
+        "GraphQL",
+        "Kafka",
+        "RabbitMQ",
+        "REST",
+        "Spring Boot",
+        "Maven",
+        "GitHub Actions",
+        "GitLab CI",
+        "CircleCI",
+        "Docker",
+        "Helm",
+        "Kubernetes runners",
+        "Elasticsearch",
+        "Superset",
+        "Airflow",
+        "Kibana",
+        "OpenTelemetry",
+        "Redis",
+        "JavaScript",
+        "TypeScript",
+        "Python",
+        "Java",
+        "Go",
+        "Bash/zsh",
+        "C#",
+        "MongoDB",
+        "MySQL",
+        "PostgreSQL",
+        "SQLite",
+        "Cypress",
+        "JUnit",
+        "Jest",
+        "K6",
+        "Pytest",
+        "Mentorship",
+        "Cross-team collaboration",
+        "Technical roadmap presentation",
+        "Stakeholder alignment",
+        "Problem-solving"
+    ],
+    "experience": [
+        {
+            "company": "NWG SPA",
+            "role": "Mid Software Engineer (Full-Stack, DevOps, Cloud Architect)",
+            "location": "Prato, Italy",
+            "start": "2023-02",
+            "end": "present",
+            "highlights": [
+                "Architected migration from PM2 to multi-node Kubernetes with blue-green deployments, 40% faster deploys, 99% uptime.",
+                "Modernized runtime ecosystem (Node.js 12→22, TypeScript, GraphQL, gRPC, Redis, Elastic, AWS SDK v2→v3).",
+                "Re-engineered CI/CD pipelines with K8s runners, delta testing, DevSecOps; halved pipeline test time.",
+                "Led payments modernization (SOAP→REST), reducing error rates by 80%, streamlined workflows.",
+                "Optimized billing and document systems with S3 + Step Functions, 15% faster processing, 60% cost savings.",
+                "Integrated AWS Textract OCR + Elasticsearch pipelines, 60% faster onboarding, better search.",
+                "Standardized infra with Pulumi IaC; hybrid connectivity (on-prem, OCI, AWS).",
+                "Upgraded Superset & Airflow; deployed to Kubernetes with LDAP integration.",
+                "Re-architected support platform to serverless Next.js SSR on AWS (Lambdas, CloudFront, S3).",
+                "Introduced OpenTelemetry tracing + ELK stack for observability."
+            ],
+            "stack": [
+                "Kubernetes",
+                "Node.js",
+                "TypeScript",
+                "GraphQL",
+                "gRPC",
+                "Redis",
+                "Elastic",
+                "AWS",
+                "Pulumi",
+                "Superset",
+                "Airflow",
+                "Next.js",
+                "Lambdas",
+                "OpenTelemetry"
+            ]
+        },
+        {
+            "company": "Taak S.R.L",
+            "role": "Full Stack / Mobile Developer",
+            "location": "Prato, Italy",
+            "start": "2021-07",
+            "end": "2023-02",
+            "highlights": [
+                "Responsive animated bank landing page with HTML/CSS/SwiperJS/Bootstrap/jQuery.",
+                "Geo-enabled public services report app: Flutter + Django REST + OpenStreetMap.",
+                "Cross-platform language learning app with Musixmatch-like features; Firebase backend.",
+                "Loan approval Angular web app with OAuth, PDF upload, draft mgmt, RBAC; Firebase backend.",
+                "Enhanced warehouse ordering system (Django, SQLite, Ajax, jQuery).",
+                "Implemented OpenTelemetry + ELK stack for observability."
+            ],
+            "stack": [
+                "Flutter",
+                "Django",
+                "Angular",
+                "Firebase",
+                "SQLite",
+                "jQuery",
+                "OpenTelemetry",
+                "ELK"
+            ]
+        },
+        {
+            "company": "Freelance",
+            "role": "Software Engineer (Full-Stack)",
+            "location": "Prato, Italy",
+            "start": "2021",
+            "end": "present",
+            "highlights": [
+                "Architected tennis match prediction platform with Angular Nx frontend + FastAPI backend, Postgres, ML models (Keras, scikit-learn, XGBoost, Random Forest).",
+                "Developed client websites with Next.js, Tailwind, Vercel, Bun, CircleCI, Cypress.",
+                "Created business site with Next.js, MUI, Bun, CircleCI, Cypress."
+            ],
+            "stack": [
+                "Angular",
+                "FastAPI",
+                "Postgres",
+                "ML",
+                "Next.js",
+                "Tailwind",
+                "Vercel",
+                "CircleCI",
+                "Cypress"
+            ]
+        }
+    ],
+    "projects": [
+        {
+            "name": "Document Converter App",
+            "highlights": [
+                "Folder-ingest platform with Kafka + microservices: .NET for Word, Python for Excel/PDF.",
+                "Real-time progress via WebSockets, idempotent jobs, DLQ retries, backpressure.",
+                "Sustained 200+ files/batch, 90% success rate, 70% less manual work."
+            ],
+            "stack": [
+                ".NET",
+                "Python",
+                "Kafka",
+                "Docker Compose",
+                "NGINX"
+            ]
+        },
+        {
+            "name": "Home Server",
+            "highlights": [
+                "Deployed private cloud solution with integrated file upload and self-hosted VPN."
+            ],
+            "stack": []
+        },
+        {
+            "name": "NPM Package",
+            "highlights": [
+                "Global NPM package for timed/cron dialog modal with TypeScript, Babel, Webpack."
+            ],
+            "stack": [
+                "TypeScript",
+                "Babel",
+                "Webpack"
+            ]
+        },
+        {
+            "name": "Digital Wardrobe App",
+            "highlights": [
+                "iOS SwiftUI app for managing wardrobe, outfits, and recommendations via K-Clustering ML + OpenWeather API."
+            ],
+            "stack": [
+                "SwiftUI",
+                "ML",
+                "OpenWeather API"
+            ]
+        }
+    ],
+    "education": [
+        {
+            "school": "King’s College London",
+            "degree": "BSc Computer Science",
+            "location": "London, UK",
+            "start": "2019-09",
+            "end": "2022-05"
+        },
+        {
+            "school": "Newham College London",
+            "degree": "Diploma in Computer Science & Maths",
+            "location": "London, UK",
+            "start": "2018-09",
+            "end": "2019-07"
+        }
+    ],
+    "certs": [
+        "AWS Certified Solutions Architect – Associate",
+        "Infrastructure as Code with Terraform",
+        "Architecting with GKE: Production"
+    ],
+    "languages": [
+        "English (Native)",
+        "Italian (Native)",
+        "Bengali (Native)",
+        "French (B1)",
+        "Japanese (JLPT N5)",
+        "German (A2)"
+    ],
+    "mentorship": [
+        "Mentored 7 developers in web development (HTML, CSS, JS, MongoDB, NodeJS, Firebase, React, Angular, Git)."
+    ]
+}

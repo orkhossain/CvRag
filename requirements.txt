@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+faiss-cpu
+sentence-transformers
+langchain-groq
+pydantic
+pdfminer.six
+python-dateutil
+python-multipart   # for file uploads
