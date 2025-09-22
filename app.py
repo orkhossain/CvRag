@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
@@ -16,6 +16,9 @@ from langchain.schema.output_parser import StrOutputParser
 
 API_TOKEN = os.getenv("API_TOKEN", "")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
+if not os.getenv("GROQ_API_KEY"):
+    raise RuntimeError("GROQ_API_KEY is not set. In Hugging Face Spaces, add it under Settings → Repository secrets. Locally: export GROQ_API_KEY=your_key")
 
 app = FastAPI(title="CV RAG API (HF Spaces)")
 app.add_middleware(
