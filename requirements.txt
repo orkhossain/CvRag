@@ -8,3 +8,4 @@ langchain-groq
 pydantic
 pdfminer.six
 python-dateutil
+langchain_huggingface
