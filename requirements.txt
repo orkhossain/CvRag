@@ -9,3 +9,4 @@ pydantic
 pdfminer.six
 python-dateutil
 langchain_huggingface
+torch
