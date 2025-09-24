@@ -1,6 +1,6 @@
 import os, json
-from typing import List, Dict
-from fastapi import FastAPI, Header, HTTPException
+from typing import List, Dict, Optional
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -14,13 +14,13 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 
-API_TOKEN = os.getenv("API_TOKEN", "")
+# --------- Environment checks ----------
+if not os.getenv("GROQ_API_KEY"):
+    raise RuntimeError("GROQ_API_KEY is not set. In Hugging Face Spaces, add it under Settings → Repository secrets.")
+
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 
-if not os.getenv("GROQ_API_KEY"):
-    raise RuntimeError("GROQ_API_KEY is not set. In Hugging Face Spaces, add it under Settings → Repository secrets. Locally: export GROQ_API_KEY=your_key")
-
-app = FastAPI(title="CV RAG API (HF Spaces)")
+app = FastAPI(title="CV Ask API (HF Spaces)")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS if ALLOWED_ORIGINS != ["*"] else ["*"],
@@ -58,9 +58,9 @@ def load_cv_docs() -> List[Document]:
         return []
     docs: List[Document] = []
 
-    def add(text, meta):
-        if text and text.strip():
-            docs.append(Document(page_content=text.strip(), metadata=meta))
+    def add(text: Optional[str], meta: Dict):
+        if text and str(text).strip():
+            docs.append(Document(page_content=str(text).strip(), metadata=meta))
 
     # Enhanced document creation with better context
     b = cv.get("basics", {})
