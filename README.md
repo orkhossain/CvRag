@@ -5,7 +5,7 @@ colorFrom: gray
 colorTo: purple
 sdk: docker
 pinned: false
-short_description: Intelligent CV RAG with unified ask endpoint and automatic intent detection
+short_description: Cv Rag
 ---
 
 # Enhanced CV RAG System - Unified Ask Endpoint
