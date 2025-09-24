@@ -19,6 +19,7 @@ if not os.getenv("GROQ_API_KEY"):
     raise RuntimeError("GROQ_API_KEY is not set. In Hugging Face Spaces, add it under Settings → Repository secrets.")
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+API_TOKEN = os.getenv("API_TOKEN", "")
 
 app = FastAPI(title="CV Ask API (HF Spaces)")
 app.add_middleware(
