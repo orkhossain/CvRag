@@ -52,113 +52,40 @@ emb = HuggingFaceEmbeddings(
 llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.1)  # Lower temp for consistency
 
 def load_cv_docs() -> List[Document]:
+    """
+    Loads CV documents from a JSON file formatted as an array of objects:
+    [
+        {"page_content": "...", "metadata": {...}},
+        {"page_content": "...", "metadata": {...}},
+        ...
+    ]
+    Returns a list of LangChain Document objects compatible with all-mpnet-base-v2 embeddings.
+    """
     try:
         with open("cv.json", "r", encoding="utf-8") as f:
-            cv = json.load(f)
+            cv_data = json.load(f)
     except FileNotFoundError:
+        print("⚠️ cv.json not found — returning empty list.")
         return []
-    docs: List[Document] = []
+    except json.JSONDecodeError as e:
+        print(f"⚠️ JSON decoding error: {e}")
+        return []
 
-    def add(text: Optional[str], meta: Dict):
-        if text and str(text).strip():
-            docs.append(Document(page_content=str(text).strip(), metadata=meta))
+    docs = []
+    for i, item in enumerate(cv_data):
+        if not isinstance(item, dict):
+            print(f"⚠️ Skipping non-dict item at index {i}: {item}")
+            continue
 
-    # Enhanced document creation with better context
-    b = cv.get("basics", {})
-    if b.get("summary"): 
-        add(f"Professional Summary: {b['summary']}", {"section":"summary", "type":"overview"})
-    
-    # Add basic info as searchable content
-    if b.get("name") and b.get("title"):
-        add(f"Name: {b['name']}, Title: {b['title']}, Location: {b.get('location', '')}", 
-            {"section":"basics", "type":"identity"})
+        text = item.get("page_content", "")
+        meta = item.get("metadata", {})
 
-    # Group skills by category for better retrieval
-    skills = cv.get("skills", [])
-    if skills:
-        # Create skill groups for better context
-        tech_skills = [s for s in skills if any(tech in s.lower() for tech in 
-                      ['aws', 'kubernetes', 'docker', 'python', 'javascript', 'react', 'angular', 'node'])]
-        cloud_skills = [s for s in skills if any(cloud in s.lower() for cloud in 
-                       ['aws', 'kubernetes', 'docker', 'pulumi', 'terraform', 'helm'])]
-        
-        add(f"Technical Skills: {', '.join(tech_skills)}", {"section":"skills", "type":"technical"})
-        add(f"Cloud & DevOps Skills: {', '.join(cloud_skills)}", {"section":"skills", "type":"cloud"})
-        add(f"All Skills: {', '.join(skills)}", {"section":"skills", "type":"comprehensive"})
+        if text and isinstance(meta, dict):
+            docs.append(Document(page_content=text.strip(), metadata=meta))
+        else:
+            print(f"⚠️ Skipping invalid entry at index {i}: {item}")
 
-    # Enhanced experience processing
-    for xp in cv.get("experience", []):
-        company = xp.get("company", "")
-        role = xp.get("role", "")
-        dates = f'{xp.get("start")}-{xp.get("end","present")}'
-        stack = xp.get("stack", [])
-        
-        # Add role summary
-        role_summary = f"Role: {role} at {company} ({dates}). Technologies: {', '.join(stack)}"
-        add(role_summary, {
-            "section": "experience",
-            "company": company,
-            "role": role,
-            "dates": dates,
-            "stack": ",".join(stack),
-            "type": "role_summary"
-        })
-        
-        # Add individual achievements with enhanced context
-        for i, highlight in enumerate(xp.get("highlights", [])):
-            enhanced_highlight = f"At {company} as {role}: {highlight}"
-            add(enhanced_highlight, {
-                "section": "experience",
-                "company": company,
-                "role": role,
-                "dates": dates,
-                "stack": ",".join(stack),
-                "achievement_id": i,
-                "type": "achievement"
-            })
-
-    # Enhanced project processing
-    for pj in cv.get("projects", []):
-        project_name = pj.get("name", "")
-        stack = pj.get("stack", [])
-        
-        # Add project summary
-        if stack:
-            project_summary = f"Project: {project_name}. Technologies used: {', '.join(stack)}"
-            add(project_summary, {
-                "section": "project",
-                "name": project_name,
-                "stack": ",".join(stack),
-                "type": "project_summary"
-            })
-        
-        # Add project highlights with context
-        for highlight in pj.get("highlights", []):
-            enhanced_highlight = f"Project {project_name}: {highlight}"
-            add(enhanced_highlight, {
-                "section": "project",
-                "name": project_name,
-                "stack": ",".join(stack),
-                "type": "project_detail"
-            })
-
-    # Add education and certifications
-    for edu in cv.get("education", []):
-        edu_text = f"Education: {edu.get('degree', '')} from {edu.get('school', '')} ({edu.get('start', '')}-{edu.get('end', '')})"
-        add(edu_text, {"section": "education", "type": "degree"})
-    
-    for cert in cv.get("certs", []):
-        add(f"Certification: {cert}", {"section": "certification", "type": "credential"})
-    
-    # Add languages
-    languages = cv.get("languages", [])
-    if languages:
-        add(f"Languages: {', '.join(languages)}", {"section": "languages", "type": "linguistic"})
-    
-    # Add mentorship
-    for mentorship in cv.get("mentorship", []):
-        add(f"Mentorship Experience: {mentorship}", {"section": "mentorship", "type": "leadership"})
-
+    print(f"✅ Loaded {len(docs)} documents from cv.json.")
     return docs
 
 def build_retriever():
