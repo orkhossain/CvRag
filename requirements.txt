@@ -2,6 +2,8 @@ fastapi
 uvicorn
 langchain
 langchain-community
+langgraph
+langchain-text-splitters
 faiss-cpu
 sentence-transformers
 langchain-groq

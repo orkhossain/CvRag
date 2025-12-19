@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  cvrag:
+    build: .
+    ports:
+      - "7860:7860"
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      API_TOKEN: ${API_TOKEN}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.1}
+    volumes:
+      - ./cv.json:/app/cv.json
