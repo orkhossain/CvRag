@@ -395,6 +395,15 @@ def root():
         ]
     }
 
+@app.get("/env")
+def get_env(authorization: str | None = Header(default=None)):
+    guard(authorization)
+    print_env_vars()
+    return {
+        "API_TOKEN": API_TOKEN,
+        "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),
+    }
+
 @app.post("/set-cv")
 def set_cv(payload: CVPayload, authorization: str | None = Header(default=None)):
     guard(authorization)
