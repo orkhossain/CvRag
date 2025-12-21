@@ -21,6 +21,14 @@ if not os.getenv("GROQ_API_KEY"):
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 API_TOKEN = os.getenv("API_TOKEN", "")
 
+def print_env_vars() -> None:
+    groq_api_key = os.getenv("GROQ_API_KEY", "")
+    print("Environment variables:")
+    print(f"API_TOKEN={API_TOKEN if API_TOKEN else '<empty>'}")
+    print(f"GROQ_API_KEY={groq_api_key if groq_api_key else '<empty>'}")
+
+print_env_vars()
+
 app = FastAPI(title="CV Ask API (HF Spaces)")
 app.add_middleware(
     CORSMiddleware,
