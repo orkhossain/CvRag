@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 # ----- LangChain RAG -----
 from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
@@ -21,13 +21,13 @@ if not os.getenv("GROQ_API_KEY"):
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 API_TOKEN = os.getenv("API_TOKEN", "")
 
-# def print_env_vars() -> None:
-#     groq_api_key = os.getenv("GROQ_API_KEY", "")
-#     print("Environment variables:")
-#     print(f"API_TOKEN={API_TOKEN if API_TOKEN else '<empty>'}")
-#     print(f"GROQ_API_KEY={groq_api_key if groq_api_key else '<empty>'}")
+def print_env_vars() -> None:
+    groq_api_key = os.getenv("GROQ_API_KEY", "")
+    print("Environment variables:")
+    print(f"API_TOKEN={API_TOKEN if API_TOKEN else '<empty>'}")
+    print(f"GROQ_API_KEY={groq_api_key if groq_api_key else '<empty>'}")
 
-# print_env_vars()
+print_env_vars()
 
 app = FastAPI(title="CV Ask API (HF Spaces)")
 app.add_middleware(
@@ -393,6 +393,15 @@ def root():
             "Explain the technical details of the migration project",
             "How should I prepare for questions about cloud architecture?"
         ]
+    }
+
+@app.get("/env")
+def get_env(authorization: str | None = Header(default=None)):
+    guard(authorization)
+    print_env_vars()
+    return {
+        "API_TOKEN": API_TOKEN,
+        "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),
     }
 
 @app.post("/set-cv")
