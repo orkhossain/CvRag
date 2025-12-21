@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, Header
+from langchain_core.messages import HumanMessage
 
 from ..core.config import CV_PATH
 from ..core.security import guard
@@ -80,7 +81,11 @@ def ask(q: Q, authorization: str | None = Header(default=None)):
         return {"error": "Query cannot be empty"}
 
     agent = get_agent()
-    result = agent.invoke({"query": q.query.strip()})
+    thread_id = q.session_id or "default"
+    result = agent.invoke(
+        {"query": q.query.strip(), "messages": [HumanMessage(content=q.query.strip())]},
+        config={"configurable": {"thread_id": thread_id}},
+    )
 
     response = {
         "answer": result.get("answer", ""),

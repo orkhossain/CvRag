@@ -1,7 +1,10 @@
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
+from langgraph.graph.message import add_messages
 
 from .formatting import format_docs
 from .intent import detect_query_intent, enhance_query
@@ -11,6 +14,7 @@ from .retriever import get_retriever
 
 
 class AgentState(TypedDict, total=False):
+    messages: Annotated[list[BaseMessage], add_messages]
     query: str
     intent: str
     context: str
@@ -79,8 +83,17 @@ def retrieve_context_node(state: AgentState) -> AgentState:
 
 def generate_response_node(state: AgentState) -> AgentState:
     prompt = PROMPTS.get(state.get("intent"), PROMPTS["general_qa"])
+    history = state.get("messages", [])
+    if history and isinstance(history[-1], HumanMessage):
+        chat_history = history[:-1]
+    else:
+        chat_history = history
     chain = (
-        {"context": lambda _: state.get("context", ""), "question": lambda _: state["query"]}
+        {
+            "context": lambda _: state.get("context", ""),
+            "question": lambda _: state["query"],
+            "chat_history": lambda _: chat_history,
+        }
         | prompt
         | get_llm()
         | StrOutputParser()
@@ -88,7 +101,7 @@ def generate_response_node(state: AgentState) -> AgentState:
 
     try:
         response = chain.invoke({})
-        return {"answer": response}
+        return {"answer": response, "messages": [AIMessage(content=response)]}
     except Exception as exc:
         return {
             "answer": (
@@ -100,6 +113,7 @@ def generate_response_node(state: AgentState) -> AgentState:
 
 
 def build_agent():
+    memory = MemorySaver()
     graph = StateGraph(AgentState)
     graph.add_node("detect_intent", detect_intent_node)
     graph.add_node("retrieve_context", retrieve_context_node)
@@ -110,7 +124,7 @@ def build_agent():
     graph.add_edge("retrieve_context", "generate_response")
     graph.add_edge("generate_response", END)
 
-    return graph.compile()
+    return graph.compile(checkpointer=memory)
 
 
 _agent = None

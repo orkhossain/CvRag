@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 SYSTEM = """You are an expert career assistant and technical interviewer with deep knowledge of software engineering, cloud architecture, and DevOps practices.
 
@@ -33,6 +33,7 @@ PROMPTS = {
                 SYSTEM
                 + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide a direct, informative answer using only the context provided.",
             ),
+            MessagesPlaceholder("chat_history"),
             ("user", "Question: {question}"),
         ]
     ),
@@ -43,6 +44,7 @@ PROMPTS = {
                 SYSTEM
                 + "\n\nRELEVANT CONTEXT:\n{context}\n\nCreate a targeted response highlighting the most relevant qualifications for the specific role mentioned. Focus on alignment between experience and role requirements.",
             ),
+            MessagesPlaceholder("chat_history"),
             (
                 "user",
                 "Query: {question}\n\nProvide a role-targeted summary (120-150 words) with bullet points emphasizing relevant experience, skills, and quantified achievements.",
@@ -56,6 +58,7 @@ PROMPTS = {
                 SYSTEM
                 + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a compelling cover letter using specific examples and quantifiable achievements from the context.",
             ),
+            MessagesPlaceholder("chat_history"),
             (
                 "user",
                 "Request: {question}\n\nCreate a professional cover letter (~180 words) that:\n1. Opens with strong alignment\n2. Highlights 2-3 relevant achievements with metrics\n3. Shows enthusiasm and understanding\n4. Closes with next steps",
@@ -69,6 +72,7 @@ PROMPTS = {
                 SYSTEM
                 + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide STAR format examples (Situation, Task, Action, Result) with specific details and quantified outcomes.",
             ),
+            MessagesPlaceholder("chat_history"),
             (
                 "user",
                 "Request: {question}\n\nGenerate compelling STAR examples that demonstrate:\n- Technical leadership and problem-solving\n- Specific actions taken\n- Quantified business impact\n\nFormat: **Situation:** [context] **Task:** [challenge] **Action:** [steps] **Result:** [outcome]",
@@ -82,6 +86,7 @@ PROMPTS = {
                 SYSTEM
                 + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide detailed technical explanations focusing on implementation details, architecture decisions, and technologies used.",
             ),
+            MessagesPlaceholder("chat_history"),
             (
                 "user",
                 "Technical Question: {question}\n\nProvide a comprehensive technical explanation including:\n- Specific technologies and tools used\n- Architecture and implementation approach\n- Challenges faced and solutions\n- Technical outcomes and metrics",
@@ -95,6 +100,7 @@ PROMPTS = {
                 SYSTEM
                 + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide comprehensive interview preparation focusing on relevant experience, specific examples, and potential follow-up questions.",
             ),
+            MessagesPlaceholder("chat_history"),
             (
                 "user",
                 "Interview Prep: {question}\n\nProvide interview-ready responses including:\n- Key talking points with specific examples\n- Quantified achievements and impact\n- Technical details where relevant\n- Potential follow-up questions to prepare for",
