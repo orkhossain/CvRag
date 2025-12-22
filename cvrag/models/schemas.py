@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -10,3 +10,30 @@ class Q(BaseModel):
 
 class CVPayload(BaseModel):
     cv: Dict
+
+
+class RoleFitRequest(BaseModel):
+    job_description: str
+    role: Optional[str] = None
+    company: Optional[str] = None
+
+
+class QuickSummaryRequest(BaseModel):
+    role_level: Optional[str] = None
+    focus: Optional[str] = None
+
+
+class ProjectDeepDiveRequest(BaseModel):
+    project_name: Optional[str] = None
+    limit: Optional[int] = 3
+    focus: Optional[str] = None
+
+
+class StarBankRequest(BaseModel):
+    competencies: Optional[List[str]] = None
+    count: Optional[int] = 3
+
+
+class ExportRequest(BaseModel):
+    format: str
+    focus: Optional[str] = None

@@ -71,6 +71,17 @@ The `/ask` endpoint automatically detects what you need and responds accordingly
 - `POST /ask` - **Primary endpoint** - handles all query types with automatic intent detection
 - `POST /set-cv` - Upload CV data (JSON format)
 - `GET /` - API documentation and examples
+- `POST /recruiter/role-fit` - Role-fit matcher against a job description
+- `POST /recruiter/quick-summary` - 30-60s recruiter-ready summary
+- `GET /recruiter/skills-matrix` - Structured skills matrix
+- `POST /recruiter/project-deep-dives` - Project deep-dive cards
+- `POST /recruiter/star-bank` - STAR examples tagged by competency
+- `GET /recruiter/certifications` - Certification verification data
+- `GET /recruiter/availability` - Availability and location preferences
+- `POST /recruiter/export` - LinkedIn or ATS-friendly export text
+- `GET /recruiter/export/pdf` - Download PDF CV when available
+- `GET /recruiter/contact` - Contact and scheduling links
+- `GET /recruiter/references` - References or endorsements
 
 ## 🔧 Technical Stack
 
@@ -104,6 +115,30 @@ POST /ask
 {
   "query": "Write a cover letter for Senior Full Stack Developer emphasizing React and Node.js experience"
 }
+```
+
+**Role Fit Matcher:**
+```json
+POST /recruiter/role-fit
+{
+  "job_description": "Senior DevOps Engineer with AWS, Terraform, and Kubernetes experience",
+  "role": "Senior DevOps Engineer",
+  "company": "ExampleCo"
+}
+```
+
+**Recruiter Summary:**
+```json
+POST /recruiter/quick-summary
+{
+  "role_level": "Senior",
+  "focus": "cloud infrastructure and automation"
+}
+```
+
+**Skills Matrix:**
+```json
+GET /recruiter/skills-matrix
 ```
 
 ## 📊 Response Format

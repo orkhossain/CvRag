@@ -1,16 +1,26 @@
 from typing import Annotated, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from langchain_core.output_parsers import StrOutputParser
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode
 
-from .formatting import format_docs
-from .intent import detect_query_intent, enhance_query
+from .context import retrieve_context
+from .intent import detect_query_intent
 from .llm import get_llm
 from .prompts import PROMPTS
-from .retriever import get_retriever
+from .tools import (
+    get_availability,
+    get_certifications,
+    get_contact_info,
+    get_cv_section,
+    get_cv_sections,
+    get_cv_stats,
+    get_projects,
+    get_references,
+    get_skills_matrix,
+)
 
 
 class AgentState(TypedDict, total=False):
@@ -29,56 +39,21 @@ def detect_intent_node(state: AgentState) -> AgentState:
 
 
 def retrieve_context_node(state: AgentState) -> AgentState:
-    retriever = get_retriever()
     intent = state.get("intent") or detect_query_intent(state["query"])
-    enhanced_query = enhance_query(state["query"], intent)
+    return retrieve_context(state["query"], intent)
 
-    if not retriever:
-        return {
-            "context": "No context available",
-            "context_used": 0,
-            "query_enhanced": enhanced_query != state["query"],
-        }
 
-    try:
-        primary_docs = retriever.invoke(enhanced_query)
-
-        secondary_docs = []
-        if intent in ["role_targeting", "cover_letter", "interview_prep"]:
-            secondary_docs = retriever.invoke("achievements leadership impact results metrics")
-        elif intent == "technical_deepdive":
-            secondary_docs = retriever.invoke(
-                "technical implementation architecture technologies stack"
-            )
-        elif intent == "star_examples":
-            secondary_docs = retriever.invoke(
-                "led architected implemented improved reduced increased"
-            )
-
-        all_docs = primary_docs + secondary_docs
-        seen_content = set()
-        unique_docs = []
-
-        for doc in all_docs:
-            content = doc.page_content
-            if content not in seen_content:
-                seen_content.add(content)
-                unique_docs.append(doc)
-
-        context = format_docs(unique_docs[:15])
-        return {
-            "context": context,
-            "context_used": len(context.split("\n")) if context else 0,
-            "query_enhanced": enhanced_query != state["query"],
-        }
-    except Exception as exc:
-        print(f"Retriever error: {exc}")
-        return {
-            "context": "Error retrieving context",
-            "context_used": 0,
-            "query_enhanced": enhanced_query != state["query"],
-            "error": True,
-        }
+TOOLS = [
+    get_cv_sections,
+    get_cv_section,
+    get_cv_stats,
+    get_skills_matrix,
+    get_contact_info,
+    get_availability,
+    get_certifications,
+    get_references,
+    get_projects,
+]
 
 
 def generate_response_node(state: AgentState) -> AgentState:
@@ -95,13 +70,14 @@ def generate_response_node(state: AgentState) -> AgentState:
             "chat_history": lambda _: chat_history,
         }
         | prompt
-        | get_llm()
-        | StrOutputParser()
+        | get_llm().bind_tools(TOOLS)
     )
 
     try:
         response = chain.invoke({})
-        return {"answer": response, "messages": [AIMessage(content=response)]}
+        if isinstance(response, AIMessage):
+            return {"answer": response.content, "messages": [response]}
+        return {"answer": str(response), "messages": [AIMessage(content=str(response))]}
     except Exception as exc:
         return {
             "answer": (
@@ -118,11 +94,23 @@ def build_agent():
     graph.add_node("detect_intent", detect_intent_node)
     graph.add_node("retrieve_context", retrieve_context_node)
     graph.add_node("generate_response", generate_response_node)
+    graph.add_node("tools", ToolNode(TOOLS))
 
     graph.set_entry_point("detect_intent")
     graph.add_edge("detect_intent", "retrieve_context")
     graph.add_edge("retrieve_context", "generate_response")
-    graph.add_edge("generate_response", END)
+
+    def route_after_agent(state: AgentState) -> str:
+        messages = state.get("messages", [])
+        if not messages:
+            return END
+        last = messages[-1]
+        if isinstance(last, AIMessage) and last.tool_calls:
+            return "tools"
+        return END
+
+    graph.add_conditional_edges("generate_response", route_after_agent)
+    graph.add_edge("tools", "generate_response")
 
     return graph.compile(checkpointer=memory)
 

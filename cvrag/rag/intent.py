@@ -56,14 +56,28 @@ def enhance_query(query: str, intent: str | None = None) -> str:
 
     if intent == "role_targeting":
         return f"relevant experience skills achievements for role: {query}"
+    if intent == "role_fit_matcher":
+        return f"job description match experience skills achievements: {query}"
     if intent == "cover_letter":
         return f"achievements leadership impact quantified results: {query}"
     if intent == "star_examples":
         return f"specific examples achievements leadership problem solving: {query}"
+    if intent == "star_bank":
+        return f"behavioral examples achievements leadership impact: {query}"
     if intent == "technical_deepdive":
         return f"technical implementation architecture details: {query}"
+    if intent == "project_deep_dives":
+        return f"projects architecture impact challenges technologies: {query}"
     if intent == "interview_prep":
         return f"experience skills achievements examples: {query}"
+    if intent == "quick_summary":
+        return f"summary highlights impact experience: {query}"
+    if intent == "skills_matrix":
+        return f"skills technologies tools experience: {query}"
+    if intent == "export_linkedin":
+        return f"professional summary highlights impact: {query}"
+    if intent == "export_ats":
+        return f"resume summary skills experience projects: {query}"
 
     if any(word in query_lower for word in ["aws", "cloud", "kubernetes", "docker"]):
         return f"cloud infrastructure devops: {query}"

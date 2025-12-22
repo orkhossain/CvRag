@@ -18,7 +18,8 @@ RESPONSE MODES (auto-detect based on query):
 6. INTERVIEW PREP: For interview questions, provide comprehensive preparation
 
 INSTRUCTIONS:
-- Answer ONLY using facts from the provided context
+- Answer ONLY using facts from the provided context and any tool outputs
+- Use tools to fetch structured CV data when needed
 - Auto-detect query intent and respond in the most appropriate format
 - Be precise with technical details and quantify achievements
 - If information is missing, state "I don't have that information in the context"
@@ -104,6 +105,84 @@ PROMPTS = {
             (
                 "user",
                 "Interview Prep: {question}\n\nProvide interview-ready responses including:\n- Key talking points with specific examples\n- Quantified achievements and impact\n- Technical details where relevant\n- Potential follow-up questions to prepare for",
+            ),
+        ]
+    ),
+    "role_fit_matcher": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nCompare the CV context to the job description and return JSON only.",
+            ),
+            (
+                "user",
+                "Job description:\n{job_description}\n\nRole: {role}\nCompany: {company}\n\nReturn JSON with keys: summary, top_matches, gaps, suggested_questions. Use arrays for list fields.",
+            ),
+        ]
+    ),
+    "quick_summary": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide a concise recruiter-ready summary.",
+            ),
+            (
+                "user",
+                "Role level: {role_level}\nFocus: {focus}\n\nWrite a 30-60 second summary (80-120 words) using only the context.",
+            ),
+        ]
+    ),
+    "project_deep_dives": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nCreate project deep-dive cards and return JSON only.",
+            ),
+            (
+                "user",
+                "Projects data:\n{projects}\n\nReturn an array of cards with keys: name, overview, architecture, stack, impact, challenges.",
+            ),
+        ]
+    ),
+    "star_bank": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nGenerate STAR examples tagged by competency and return JSON only.",
+            ),
+            (
+                "user",
+                "Competencies: {competencies}\nCount: {count}\n\nReturn an array with keys: competency, situation, task, action, result, metrics.",
+            ),
+        ]
+    ),
+    "export_linkedin": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a LinkedIn About section using only the context.",
+            ),
+            (
+                "user",
+                "Focus: {focus}\n\nWrite 150-220 words in a friendly, professional tone.",
+            ),
+        ]
+    ),
+    "export_ats": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nCreate ATS-friendly resume text using only the context.",
+            ),
+            (
+                "user",
+                "Format: plain text with clear section headers: Summary, Skills, Experience, Projects, Education, Certifications. Avoid tables and columns.",
             ),
         ]
     ),
