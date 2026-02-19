@@ -168,4 +168,17 @@ PROMPTS = {
             ),
         ]
     ),
+    "recruiter_pitch": ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                SYSTEM
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a concise recruiter-facing pitch that explains why the candidate is a strong option. Use only the context.",
+            ),
+            (
+                "user",
+                "Question: {question}\n\nRespond in 4-6 sentences. Mention role-relevant strengths, impact, and any soft skills explicitly present in the context.",
+            ),
+        ]
+    ),
 }

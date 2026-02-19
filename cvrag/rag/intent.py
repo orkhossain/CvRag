@@ -47,6 +47,20 @@ def detect_query_intent(query: str) -> str:
 
     if any(
         phrase in query_lower
+        for phrase in [
+            "why are you the best",
+            "why should we hire",
+            "why hire",
+            "best candidate",
+            "best option",
+            "sell yourself",
+            "pitch yourself",
+        ]
+    ):
+        return "recruiter_pitch"
+
+    if any(
+        phrase in query_lower
         for phrase in ["skill", "skills", "technologies", "tech stack", "stack"]
     ):
         return "skills_matrix"
