@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.routes import router
 from .core.config import ALLOWED_ORIGINS, validate_env
+from .core.cv_data import ensure_cv_json
 from .rag.retriever import init_retriever
 
 validate_env()
+ensure_cv_json()
 init_retriever()
 
 app = FastAPI(title="CV Ask API (HF Spaces)")

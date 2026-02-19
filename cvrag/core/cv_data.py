@@ -27,6 +27,17 @@ def load_cv_data() -> dict[str, Any] | None:
     return _normalize_cv_data(raw) if raw is not None else None
 
 
+def ensure_cv_json() -> dict[str, Any] | None:
+    """Ensure a JSON representation exists for the CV, generating from PDF if needed."""
+    return load_cv_data()
+
+
+def rebuild_cv_json() -> dict[str, Any] | None:
+    """Force rebuild JSON from PDF, overwriting any existing JSON file."""
+    json_path = _get_json_path()
+    return _build_json_from_pdf(json_path)
+
+
 def _normalize_cv_data(raw: Any) -> dict[str, Any] | None:
     if isinstance(raw, dict):
         return raw

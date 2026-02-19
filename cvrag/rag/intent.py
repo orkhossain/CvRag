@@ -45,6 +45,12 @@ def detect_query_intent(query: str) -> str:
     ):
         return "interview_prep"
 
+    if any(
+        phrase in query_lower
+        for phrase in ["skill", "skills", "technologies", "tech stack", "stack"]
+    ):
+        return "skills_matrix"
+
     return "general_qa"
 
 

@@ -21,7 +21,7 @@ from ..rag.graph import get_agent
 from ..rag.loader import load_cv_docs
 from ..rag.llm import get_llm
 from ..rag.prompts import PROMPTS
-from ..rag.retriever import build_retriever, set_retriever
+from ..rag.retriever import build_retriever, get_retriever, set_retriever
 from ..recruiter.features import (
     build_availability,
     build_certifications,
@@ -45,6 +45,14 @@ def _safe_json(text: str):
         return json.loads(text)
     except json.JSONDecodeError:
         return text
+
+
+def _ensure_cv_ready():
+    if get_retriever() is None:
+        return {
+            "error": "CV data not found. Upload your CV using /set-cv or set CV_PATH to a cv.json/cv.pdf and restart."
+        }
+    return None
 
 
 @router.get("/")
@@ -127,6 +135,10 @@ def ask(q: Q, authorization: str | None = Header(default=None)):
     if not q.query.strip():
         return {"error": "Query cannot be empty"}
 
+    cv_error = _ensure_cv_ready()
+    if cv_error:
+        return cv_error
+
     agent = get_agent()
     thread_id = q.session_id or "default"
     result = agent.invoke(
@@ -150,6 +162,10 @@ def ask(q: Q, authorization: str | None = Header(default=None)):
 @router.post("/recruiter/role-fit")
 def role_fit(payload: RoleFitRequest, authorization: str | None = Header(default=None)):
     guard(authorization)
+
+    cv_error = _ensure_cv_ready()
+    if cv_error:
+        return cv_error
 
     job_description = payload.job_description.strip()
     if not job_description:
@@ -185,6 +201,10 @@ def quick_summary(
     payload: QuickSummaryRequest, authorization: str | None = Header(default=None)
 ):
     guard(authorization)
+
+    cv_error = _ensure_cv_ready()
+    if cv_error:
+        return cv_error
 
     query_parts = ["recruiter summary"]
     if payload.role_level:
@@ -225,6 +245,9 @@ def project_deep_dives(
     payload: ProjectDeepDiveRequest, authorization: str | None = Header(default=None)
 ):
     guard(authorization)
+    cv_error = _ensure_cv_ready()
+    if cv_error:
+        return cv_error
     cv = load_cv()
     if not cv:
         return {"error": "CV data not found", "projects": []}
@@ -262,6 +285,10 @@ def star_bank(
     payload: StarBankRequest, authorization: str | None = Header(default=None)
 ):
     guard(authorization)
+
+    cv_error = _ensure_cv_ready()
+    if cv_error:
+        return cv_error
 
     competencies = payload.competencies or []
     count = payload.count if payload.count is not None else 3
@@ -307,6 +334,10 @@ def availability(authorization: str | None = Header(default=None)):
 @router.post("/recruiter/export")
 def export(payload: ExportRequest, authorization: str | None = Header(default=None)):
     guard(authorization)
+
+    cv_error = _ensure_cv_ready()
+    if cv_error:
+        return cv_error
 
     export_format = payload.format.strip().lower()
     if export_format not in {"linkedin", "ats"}:
