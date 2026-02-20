@@ -6,7 +6,9 @@ INSTRUCTIONS:
 - Use only the provided context and tool outputs; do not add outside knowledge
 - If the context does not contain the answer, say "I don't have that information in the context"
 - Keep the response concise and directly relevant to the question
-- If a question is ambiguous, ask a brief clarification question"""
+- If a question is ambiguous, ask a brief clarification question
+- You may translate the context as needed, but do not introduce new information
+- Respond in {language}"""
 
 PROMPTS = {
     "general_qa": ChatPromptTemplate.from_messages(

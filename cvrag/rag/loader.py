@@ -18,7 +18,7 @@ def load_cv_docs() -> List[Document]:
             ...
         ]
       - a PDF file (single or directory of PDFs)
-    Returns a list of LangChain Document objects compatible with all-mpnet-base-v2 embeddings.
+    Returns a list of LangChain Document objects compatible with multilingual embeddings.
     """
     path = CV_PATH
     if path.is_dir():

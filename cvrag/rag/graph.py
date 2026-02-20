@@ -11,6 +11,7 @@ from langgraph.prebuilt import ToolNode
 from .context import retrieve_context
 from ..core.cv_data import get_section, load_cv_data
 from .intent import detect_query_intent
+from .language import resolve_language
 from .llm import get_llm
 from .prompts import PROMPTS
 from .tools import (
@@ -36,6 +37,7 @@ class AgentState(TypedDict, total=False):
     context_used: int
     query_enhanced: bool
     error: bool
+    language: str
 
 
 def detect_intent_node(state: AgentState) -> AgentState:
@@ -103,6 +105,10 @@ def generate_response_node(state: AgentState) -> AgentState:
             "context": lambda _: state.get("context", ""),
             "question": lambda _: state["query"],
             "chat_history": lambda _: chat_history,
+            "language": lambda _: resolve_language(
+                state.get("language"),
+                [state.get("query", ""), state.get("context", "")],
+            ),
         }
         | prompt
         | get_llm()

@@ -18,6 +18,7 @@ from ..models.schemas import (
 )
 from ..rag.context import retrieve_context
 from ..rag.graph import get_agent
+from ..rag.language import resolve_language
 from ..rag.loader import load_cv_docs
 from ..rag.llm import get_llm
 from ..rag.prompts import PROMPTS
@@ -72,7 +73,7 @@ def root():
         ],
         "features": [
             "Intent auto-detection from natural language queries",
-            "Advanced embedding model (all-mpnet-base-v2)",
+            "Advanced embedding model (paraphrase-multilingual-mpnet-base-v2)",
             "MMR retrieval for diverse, relevant results",
             "Context-aware response formatting",
             "Multi-strategy document retrieval",
@@ -141,8 +142,13 @@ def ask(q: Q, authorization: str | None = Header(default=None)):
 
     agent = get_agent()
     thread_id = q.session_id or "default"
+    language = resolve_language(q.language, [q.query])
     result = agent.invoke(
-        {"query": q.query.strip(), "messages": [HumanMessage(content=q.query.strip())]},
+        {
+            "query": q.query.strip(),
+            "messages": [HumanMessage(content=q.query.strip())],
+            "language": language,
+        },
         config={"configurable": {"thread_id": thread_id}},
     )
 
@@ -179,6 +185,9 @@ def role_fit(payload: RoleFitRequest, authorization: str | None = Header(default
     query = " ".join(query_parts)
 
     context = retrieve_context(query, intent="role_fit_matcher")
+    language = resolve_language(
+        payload.language, [job_description, payload.role or "", payload.company or ""]
+    )
     response = _run_prompt(
         PROMPTS["role_fit_matcher"],
         {
@@ -186,6 +195,7 @@ def role_fit(payload: RoleFitRequest, authorization: str | None = Header(default
             "job_description": job_description,
             "role": payload.role or "",
             "company": payload.company or "",
+            "language": language,
         },
     )
 
@@ -214,12 +224,14 @@ def quick_summary(
     query = " ".join(query_parts)
 
     context = retrieve_context(query, intent="quick_summary")
+    language = resolve_language(payload.language, [payload.focus or "", payload.role_level or ""])
     response = _run_prompt(
         PROMPTS["quick_summary"],
         {
             "context": context["context"],
             "role_level": payload.role_level or "",
             "focus": payload.focus or "",
+            "language": language,
         },
     )
 
@@ -265,11 +277,13 @@ def project_deep_dives(
 
     context_query = payload.focus or "project deep dive"
     context = retrieve_context(context_query, intent="project_deep_dives")
+    language = resolve_language(payload.language, [payload.focus or "", payload.project_name or ""])
     response = _run_prompt(
         PROMPTS["project_deep_dives"],
         {
             "context": context["context"],
             "projects": json.dumps(projects, indent=2),
+            "language": language,
         },
     )
 
@@ -294,6 +308,7 @@ def star_bank(
     count = payload.count if payload.count is not None else 3
     context_query = " ".join(competencies) if competencies else "star examples"
     context = retrieve_context(context_query, intent="star_bank")
+    language = resolve_language(payload.language, competencies)
 
     response = _run_prompt(
         PROMPTS["star_bank"],
@@ -301,6 +316,7 @@ def star_bank(
             "context": context["context"],
             "competencies": ", ".join(competencies) if competencies else "general",
             "count": count,
+            "language": language,
         },
     )
 
@@ -345,11 +361,13 @@ def export(payload: ExportRequest, authorization: str | None = Header(default=No
 
     intent = "export_linkedin" if export_format == "linkedin" else "export_ats"
     context = retrieve_context(payload.focus or export_format, intent=intent)
+    language = resolve_language(payload.language, [payload.focus or "", export_format])
     response = _run_prompt(
         PROMPTS[intent],
         {
             "context": context["context"],
             "focus": payload.focus or "",
+            "language": language,
         },
     )
 

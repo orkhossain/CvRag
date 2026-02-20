@@ -86,7 +86,7 @@ The `/ask` endpoint automatically detects what you need and responds accordingly
 ## 🔧 Technical Stack
 
 - **Framework**: FastAPI with CORS support
-- **Embeddings**: HuggingFace `all-mpnet-base-v2` (superior for technical content)
+- **Embeddings**: HuggingFace `paraphrase-multilingual-mpnet-base-v2` (multilingual semantic search)
 - **Vector Store**: FAISS with Maximum Marginal Relevance
 - **LLM**: Groq Llama 3.1 8B Instant
 - **Processing**: Enhanced chunking with semantic awareness
