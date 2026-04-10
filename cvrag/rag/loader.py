@@ -5,7 +5,7 @@ from typing import List
 from langchain_community.document_loaders import PDFMinerLoader
 from langchain_core.documents import Document
 
-from ..core.config import CV_PATH
+from ..core.config import CV_PATH, SOFT_SKILLS
 
 
 def load_cv_docs() -> List[Document]:
@@ -22,10 +22,23 @@ def load_cv_docs() -> List[Document]:
     """
     path = CV_PATH
     if path.is_dir():
-        return _load_pdf_dir(path)
+        return _append_soft_skills(_load_pdf_dir(path))
     if path.suffix.lower() == ".pdf":
-        return _load_pdf_docs(path)
-    return _load_json_docs(path)
+        return _append_soft_skills(_load_pdf_docs(path))
+    return _append_soft_skills(_load_json_docs(path))
+
+
+def _append_soft_skills(docs: List[Document]) -> List[Document]:
+    if not SOFT_SKILLS:
+        return docs
+    text = "Soft skills: " + ", ".join(SOFT_SKILLS)
+    docs.append(
+        Document(
+            page_content=text,
+            metadata={"section": "skills", "category": "soft_skills"},
+        )
+    )
+    return docs
 
 
 def _load_json_docs(path: Path) -> List[Document]:

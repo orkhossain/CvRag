@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..core.config import SOFT_SKILLS
 from ..core.cv_data import get_section, load_cv_data
 
 
@@ -26,6 +27,24 @@ def build_skills_matrix(cv: dict[str, Any]) -> list[dict[str, Any]]:
         normalized = _normalize_skill(entry, None)
         if normalized:
             matrix.append(normalized)
+    existing = {
+        str(entry.get("skill", "")).strip().lower()
+        for entry in matrix
+        if isinstance(entry, dict)
+    }
+    for skill in SOFT_SKILLS:
+        if skill.strip().lower() in existing:
+            continue
+        matrix.append(
+            {
+                "skill": skill,
+                "category": "Soft Skills",
+                "proficiency": None,
+                "years": None,
+                "last_used": None,
+                "keywords": None,
+            }
+        )
     return matrix
 
 

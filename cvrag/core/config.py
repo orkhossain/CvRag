@@ -23,6 +23,23 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq").lower()
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.1"))
 
 
+def _parse_soft_skills(raw: str) -> list[str]:
+    if not raw:
+        return []
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+SOFT_SKILLS = _parse_soft_skills(os.getenv("SOFT_SKILLS", ""))
+if not SOFT_SKILLS:
+    SOFT_SKILLS = [
+        "Leadership",
+        "Communication",
+        "Proactivity",
+        "Time Management",
+        "Planning",
+    ]
+
+
 def validate_env() -> None:
     if LLM_PROVIDER == "groq":
         if not GROQ_API_KEY:
