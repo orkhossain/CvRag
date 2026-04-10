@@ -8,6 +8,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
+from .clarification import build_clarification_response
 from .context import retrieve_context
 from ..core.cv_data import get_section, load_cv_data
 from .intent import detect_query_intent
@@ -38,6 +39,9 @@ class AgentState(TypedDict, total=False):
     query_enhanced: bool
     error: bool
     language: str
+    needs_clarification: bool
+    clarifying_question: str
+    follow_up_options: list[str]
 
 
 def detect_intent_node(state: AgentState) -> AgentState:
@@ -64,6 +68,20 @@ TOOLS = [
 
 
 def generate_response_node(state: AgentState) -> AgentState:
+    clarification = build_clarification_response(
+        state.get("query", ""),
+        state.get("intent", "general_qa"),
+    )
+    if clarification:
+        answer = str(clarification["answer"])
+        return {
+            "answer": answer,
+            "needs_clarification": True,
+            "clarifying_question": str(clarification["clarifying_question"]),
+            "follow_up_options": list(clarification["follow_up_options"]),
+            "messages": [AIMessage(content=answer)],
+        }
+
     context = (state.get("context") or "").strip()
     if not context or context in {"No context available", "Error retrieving context"}:
         return {

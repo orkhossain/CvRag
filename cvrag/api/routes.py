@@ -161,6 +161,10 @@ def ask(q: Q, authorization: str | None = Header(default=None)):
 
     if result.get("error"):
         response["error"] = True
+    if result.get("needs_clarification"):
+        response["needs_clarification"] = True
+        response["clarifying_question"] = result.get("clarifying_question", "")
+        response["follow_up_options"] = result.get("follow_up_options", [])
 
     return response
 
