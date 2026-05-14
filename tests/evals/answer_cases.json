@@ -1,0 +1,27 @@
+[
+  {
+    "id": "answer_001",
+    "query": "Create a recruiter pitch for a backend role",
+    "must_not_include": [],
+    "max_words": 160
+  },
+  {
+    "id": "answer_002",
+    "query": "Write a cover letter for a senior DevOps engineer role",
+    "must_not_include": [],
+    "max_words": 250
+  },
+  {
+    "id": "answer_003",
+    "query": "Give me a STAR example of solving a technical problem",
+    "must_not_include": [],
+    "max_words": 300,
+    "must_include_any": ["situation", "task", "action", "result"]
+  },
+  {
+    "id": "answer_004",
+    "query": "What are my top technical skills?",
+    "must_not_include": [],
+    "max_words": 150
+  }
+]

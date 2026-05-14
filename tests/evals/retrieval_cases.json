@@ -1,0 +1,50 @@
+[
+  {
+    "id": "retrieval_001",
+    "query": "Tell me about my AWS experience",
+    "expected_sections": ["experience", "skills", "projects"],
+    "must_include_any": ["aws", "cloud", "infrastructure"]
+  },
+  {
+    "id": "retrieval_002",
+    "query": "What Python frameworks have I used?",
+    "expected_sections": ["skills", "experience", "projects"],
+    "must_include_any": ["python", "fastapi", "django", "flask"]
+  },
+  {
+    "id": "retrieval_003",
+    "query": "Describe my leadership experience",
+    "expected_sections": ["experience"],
+    "must_include_any": ["lead", "led", "team", "managed", "management"]
+  },
+  {
+    "id": "retrieval_004",
+    "query": "What is my educational background?",
+    "expected_sections": ["education"],
+    "must_include_any": []
+  },
+  {
+    "id": "retrieval_005",
+    "query": "What certifications do I have?",
+    "expected_sections": ["certifications"],
+    "must_include_any": ["certified", "certificate", "aws", "certification"]
+  },
+  {
+    "id": "retrieval_006",
+    "query": "Tell me about my Kubernetes work",
+    "expected_sections": ["experience", "projects", "skills"],
+    "must_include_any": ["kubernetes", "k8s", "container", "docker"]
+  },
+  {
+    "id": "retrieval_007",
+    "query": "What are my measurable achievements?",
+    "expected_sections": ["experience", "projects"],
+    "must_include_any": []
+  },
+  {
+    "id": "retrieval_008",
+    "query": "What programming languages do I know?",
+    "expected_sections": ["skills"],
+    "must_include_any": ["python", "java", "javascript", "go", "typescript"]
+  }
+]

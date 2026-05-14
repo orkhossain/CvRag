@@ -1,14 +1,12 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-SYSTEM = """You are a helpful assistant. Answer the user's question based ONLY on the provided context and any tool outputs.
-
-INSTRUCTIONS:
-- Use only the provided context and tool outputs; do not add outside knowledge
-- If the context does not contain the answer, say "I don't have that information in the context"
-- Keep the response concise and directly relevant to the question
-- If a question is ambiguous, ask a brief clarification question
-- You may translate the context as needed, but do not introduce new information
-- Respond in {language}"""
+SYSTEM = """You are a CV assistant.
+Use only the provided CV context. Do not invent facts.
+Do not invent company names, job titles, dates, metrics, certifications, education, or technologies.
+If the user asks for something not present in the context, say what is missing and provide the best available answer from the context.
+If the context does not contain the answer, say "I don't have that information in the context."
+Keep the response concise and directly relevant to the question.
+Respond in {language}."""
 
 PROMPTS = {
     "general_qa": ChatPromptTemplate.from_messages(
@@ -41,7 +39,9 @@ PROMPTS = {
             (
                 "system",
                 SYSTEM
-                + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a compelling cover letter using specific examples and quantifiable achievements from the context.",
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a compelling cover letter using specific examples and quantifiable achievements from the context."
+                "\nDo not invent the recipient company unless the user provided one."
+                "\nDo not claim exact years, numbers, or certifications unless present in context.",
             ),
             MessagesPlaceholder("chat_history"),
             (
@@ -55,7 +55,9 @@ PROMPTS = {
             (
                 "system",
                 SYSTEM
-                + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide STAR format examples (Situation, Task, Action, Result) with specific details and quantified outcomes.",
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nProvide STAR format examples (Situation, Task, Action, Result) with specific details and quantified outcomes."
+                "\nUse only events supported by the context."
+                "\nIf the context lacks a complete STAR story, build the closest supported version and mention that details are limited.",
             ),
             MessagesPlaceholder("chat_history"),
             (
@@ -175,7 +177,9 @@ PROMPTS = {
             (
                 "system",
                 SYSTEM
-                + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a concise recruiter-facing pitch that explains why the candidate is a strong option. Use only the context.",
+                + "\n\nRELEVANT CONTEXT:\n{context}\n\nWrite a concise recruiter-facing pitch that explains why the candidate is a strong option. Use only the context."
+                "\nPrioritize verified experience, measurable impact, and relevant skills from context."
+                "\nDo not oversell unsupported claims.",
             ),
             (
                 "user",

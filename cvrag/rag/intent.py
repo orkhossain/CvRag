@@ -1,20 +1,38 @@
-def detect_query_intent(query: str) -> str:
-    query_lower = query.lower()
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+ALLOWED_INTENTS = {
+    "role_targeting",
+    "cover_letter",
+    "star_examples",
+    "technical_deepdive",
+    "interview_prep",
+    "recruiter_pitch",
+    "skills_matrix",
+    "general_qa",
+    "role_fit_matcher",
+    "project_deep_dives",
+    "star_bank",
+    "quick_summary",
+}
+
+
+@dataclass
+class IntentResult:
+    intent: str
+    confidence: float
+    matched_rule: str | None = None
+
+
+def detect_query_intent_with_confidence(query: str) -> IntentResult:
+    q = query.lower()
+
+    if any(phrase in q for phrase in ["cover letter", "application letter", "letter for"]):
+        return IntentResult("cover_letter", 0.95, "cover_letter")
 
     if any(
-        phrase in query_lower
-        for phrase in ["for the role", "position at", "applying to", "job at", "role of"]
-    ):
-        return "role_targeting"
-
-    if any(
-        phrase in query_lower
-        for phrase in ["cover letter", "application letter", "letter for"]
-    ):
-        return "cover_letter"
-
-    if any(
-        phrase in query_lower
+        phrase in q
         for phrase in [
             "give me an example",
             "tell me about a time",
@@ -25,10 +43,10 @@ def detect_query_intent(query: str) -> str:
             "behavioral",
         ]
     ):
-        return "star_examples"
+        return IntentResult("star_examples", 0.90, "star_examples")
 
     if any(
-        phrase in query_lower
+        phrase in q
         for phrase in [
             "how did you implement",
             "technical details",
@@ -37,16 +55,19 @@ def detect_query_intent(query: str) -> str:
             "explain the technical",
         ]
     ):
-        return "technical_deepdive"
+        return IntentResult("technical_deepdive", 0.85, "technical_deepdive")
 
     if any(
-        phrase in query_lower
-        for phrase in ["interview", "prepare for", "questions about", "what would you say"]
+        phrase in q
+        for phrase in ["for the role", "position at", "applying to", "job at", "role of"]
     ):
-        return "interview_prep"
+        return IntentResult("role_targeting", 0.85, "role_targeting")
+
+    if any(phrase in q for phrase in ["interview", "prepare for", "questions about", "what would you say"]):
+        return IntentResult("interview_prep", 0.80, "interview")
 
     if any(
-        phrase in query_lower
+        phrase in q
         for phrase in [
             "why are you the best",
             "why should we hire",
@@ -57,15 +78,42 @@ def detect_query_intent(query: str) -> str:
             "pitch yourself",
         ]
     ):
-        return "recruiter_pitch"
+        return IntentResult("recruiter_pitch", 0.80, "recruiter_pitch")
 
-    if any(
-        phrase in query_lower
-        for phrase in ["skill", "skills", "technologies", "tech stack", "stack"]
-    ):
-        return "skills_matrix"
+    if any(phrase in q for phrase in ["skill", "skills", "technologies", "tech stack", "stack",
+                                       "programming language", "programming languages"]):
+        return IntentResult("skills_matrix", 0.80, "skills")
 
-    return "general_qa"
+    return IntentResult("general_qa", 0.55, None)
+
+
+def llm_intent_router(query: str) -> IntentResult:
+    """LLM fallback for low-confidence rule-based results."""
+    try:
+        from .llm import get_llm
+
+        allowed = ", ".join(sorted(ALLOWED_INTENTS))
+        prompt = (
+            f"Classify the following query into exactly one of these intents: {allowed}\n\n"
+            f"Query: {query}\n\n"
+            "Reply with only the intent name, nothing else."
+        )
+        llm = get_llm()
+        result = llm.invoke(prompt)
+        raw = (result.content if hasattr(result, "content") else str(result)).strip().lower()
+        raw = raw.strip("\"'`").split()[0] if raw.split() else "general_qa"
+        intent = raw if raw in ALLOWED_INTENTS else "general_qa"
+        return IntentResult(intent, 0.75, "llm_fallback")
+    except Exception:
+        return IntentResult("general_qa", 0.50, "llm_fallback_error")
+
+
+def detect_query_intent(query: str) -> str:
+    """Backward-compatible entry point. Uses LLM fallback for low-confidence cases."""
+    result = detect_query_intent_with_confidence(query)
+    if result.confidence < 0.70:
+        result = llm_intent_router(query)
+    return result.intent
 
 
 def enhance_query(query: str, intent: str | None = None) -> str:

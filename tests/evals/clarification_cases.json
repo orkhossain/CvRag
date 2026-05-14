@@ -1,0 +1,16 @@
+[
+  {"id": "clarify_001", "query": "Write a cover letter", "intent": "cover_letter", "should_clarify": true},
+  {"id": "clarify_002", "query": "Write a cover letter for a backend developer role focused on AWS and Docker", "intent": "cover_letter", "should_clarify": false},
+  {"id": "clarify_003", "query": "Prepare me for an interview", "intent": "interview_prep", "should_clarify": true},
+  {"id": "clarify_004", "query": "Prepare me for a technical interview focused on Kubernetes and distributed systems", "intent": "interview_prep", "should_clarify": false},
+  {"id": "clarify_005", "query": "Why should we hire you?", "intent": "recruiter_pitch", "should_clarify": true},
+  {"id": "clarify_006", "query": "Why should we hire you for a senior backend engineer role focused on Python and AWS at a fintech?", "intent": "recruiter_pitch", "should_clarify": false},
+  {"id": "clarify_007", "query": "Tailor my CV for a role", "intent": "role_targeting", "should_clarify": true},
+  {"id": "clarify_008", "query": "Tailor my CV for a senior DevOps engineer role at Spotify", "intent": "role_targeting", "should_clarify": false},
+  {"id": "clarify_009", "query": "Give me a star example", "intent": "star_examples", "should_clarify": false},
+  {"id": "clarify_010", "query": "What is my experience?", "intent": "general_qa", "should_clarify": false},
+  {"id": "clarify_011", "query": "Write a letter for this position", "intent": "cover_letter", "should_clarify": true},
+  {"id": "clarify_012", "query": "Write a cover letter for a Python developer position at Stripe focusing on FastAPI and microservices", "intent": "cover_letter", "should_clarify": false},
+  {"id": "clarify_013", "query": "Prepare interview answers", "intent": "interview_prep", "should_clarify": true},
+  {"id": "clarify_014", "query": "Prepare behavioral interview answers focusing on leadership and stakeholder management", "intent": "interview_prep", "should_clarify": false}
+]

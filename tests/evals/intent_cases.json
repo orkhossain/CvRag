@@ -1,0 +1,22 @@
+[
+  {"id": "intent_001", "query": "Write a cover letter for a backend developer role", "expected_intent": "cover_letter"},
+  {"id": "intent_002", "query": "Tell me about a time I solved a difficult technical problem", "expected_intent": "star_examples"},
+  {"id": "intent_003", "query": "What cloud technologies do I know?", "expected_intent": "skills_matrix"},
+  {"id": "intent_004", "query": "How did you implement the CI/CD pipeline?", "expected_intent": "technical_deepdive"},
+  {"id": "intent_005", "query": "Prepare me for a technical interview", "expected_intent": "interview_prep"},
+  {"id": "intent_006", "query": "Why should we hire you?", "expected_intent": "recruiter_pitch"},
+  {"id": "intent_007", "query": "What is my experience with Python?", "expected_intent": "general_qa"},
+  {"id": "intent_008", "query": "Tailor my CV for the role of Senior Engineer at Stripe", "expected_intent": "role_targeting"},
+  {"id": "intent_009", "query": "Give me a star example of a time I led a team", "expected_intent": "star_examples"},
+  {"id": "intent_010", "query": "What is my tech stack?", "expected_intent": "skills_matrix"},
+  {"id": "intent_011", "query": "Write an application letter for a DevOps position", "expected_intent": "cover_letter"},
+  {"id": "intent_012", "query": "Describe a situation where you improved performance", "expected_intent": "star_examples"},
+  {"id": "intent_013", "query": "Explain the technical architecture of your main project", "expected_intent": "technical_deepdive"},
+  {"id": "intent_014", "query": "What questions should I prepare for an interview?", "expected_intent": "interview_prep"},
+  {"id": "intent_015", "query": "Sell yourself as the best candidate for this position", "expected_intent": "recruiter_pitch"},
+  {"id": "intent_016", "query": "What programming languages do I use?", "expected_intent": "skills_matrix"},
+  {"id": "intent_017", "query": "What is my educational background?", "expected_intent": "general_qa"},
+  {"id": "intent_018", "query": "I am applying to a job at Google for the role of SRE", "expected_intent": "role_targeting"},
+  {"id": "intent_019", "query": "Tell me about a behavioral example of leadership", "expected_intent": "star_examples"},
+  {"id": "intent_020", "query": "Deep dive into the Kubernetes deployment you set up", "expected_intent": "technical_deepdive"}
+]

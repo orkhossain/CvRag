@@ -11,33 +11,90 @@ RECRUITER_GUIDE_OPTIONS = {
     "deep_dive": "Explain a project or technical decision",
 }
 
+_RECRUITER_INTENTS = {
+    "role_targeting",
+    "cover_letter",
+    "interview_prep",
+    "recruiter_pitch",
+}
 
-def build_clarification_response(query: str, intent: str) -> dict[str, object] | None:
+
+# ──────────────────────────────────────────
+# Specificity scoring
+# ──────────────────────────────────────────
+
+def query_specificity_score(query: str) -> float:
+    score = 0.0
+    q = query.lower()
+
+    if len(q.split()) >= 8:
+        score += 0.25
+
+    if any(role in q for role in ["engineer", "developer", "architect", "manager", "analyst"]):
+        score += 0.25
+
+    if any(
+        term in q
+        for term in [
+            "aws", "docker", "kubernetes", "python", "java", "react", "fastapi",
+            "gcp", "azure", "terraform", "django", "node", "typescript",
+            "leadership", "behavioral", "stakeholder", "backend", "frontend",
+            "platform", "security", "devops", "fullstack", "cloud", "sre",
+        ]
+    ):
+        score += 0.25
+
+    if " at " in q or " for " in q:
+        score += 0.15
+
+    if len(q) > 180:
+        score += 0.10
+
+    return min(score, 1.0)
+
+
+# ──────────────────────────────────────────
+# Unified clarification decision
+# ──────────────────────────────────────────
+
+def should_clarify(
+    query: str,
+    intent: str,
+    retrieval_confidence: float | None = None,
+    intent_confidence: float | None = None,
+) -> bool:
+    if intent not in _RECRUITER_INTENTS:
+        return False
+
+    specificity = query_specificity_score(query)
+    rc = retrieval_confidence if retrieval_confidence is not None else 0.0
+    ic = intent_confidence if intent_confidence is not None else 1.0
+
+    return specificity < 0.45 and rc < 0.60 and ic >= 0.50
+
+
+# ──────────────────────────────────────────
+# Response builder
+# ──────────────────────────────────────────
+
+def build_clarification_response(
+    query: str,
+    intent: str,
+    retrieval_confidence: float | None = None,
+    intent_confidence: float | None = None,
+) -> dict[str, object] | None:
     cleaned = query.strip()
     if not cleaned:
         return None
 
-    if intent not in {
-        "role_targeting",
-        "cover_letter",
-        "interview_prep",
-        "recruiter_pitch",
-        "general_qa",
-    }:
+    if not _is_recruiter_like(cleaned.lower(), intent):
         return None
 
-    lowered = cleaned.lower()
-    recruiter_like = _is_recruiter_like(lowered, intent)
-    if not recruiter_like:
-        return None
-
-    if not _needs_clarification(lowered, intent):
+    if not should_clarify(cleaned, intent, retrieval_confidence, intent_confidence):
         return None
 
     if intent == "cover_letter":
-        question = (
-            "Which cover-letter direction do you want me to take for the recruiter?"
-        )
+        question = "Which cover-letter direction do you want me to take for the recruiter?"
         options = [
             "Target a specific role and company",
             "Emphasize cloud or platform experience",
@@ -84,8 +141,12 @@ def build_clarification_response(query: str, intent: str) -> dict[str, object] |
     }
 
 
+# ──────────────────────────────────────────
+# Internal helpers
+# ──────────────────────────────────────────
+
 def _is_recruiter_like(query: str, intent: str) -> bool:
-    if intent in {"role_targeting", "cover_letter", "interview_prep", "recruiter_pitch"}:
+    if intent in _RECRUITER_INTENTS:
         return True
     return any(
         phrase in query
@@ -100,44 +161,4 @@ def _is_recruiter_like(query: str, intent: str) -> bool:
             "what should i ask",
             "screen",
         ]
-    )
-
-
-def _needs_clarification(query: str, intent: str) -> bool:
-    token_count = len(re.findall(r"\w+", query))
-    has_job_description = len(query) > 180 or "job description" in query
-    has_company = bool(re.search(r"\bat\s+[a-z0-9&.-]+\b", query))
-    has_role = bool(
-        re.search(
-            r"\b(engineer|developer|architect|manager|lead|consultant|designer|sre|devops)\b",
-            query,
-        )
-    )
-    has_focus = bool(
-        re.search(
-            r"\b(aws|azure|gcp|kubernetes|docker|terraform|python|react|node|leadership|backend|frontend|platform|security)\b",
-            query,
-        )
-    )
-
-    if intent == "cover_letter":
-        return not (has_role or has_company or has_focus)
-    if intent == "interview_prep":
-        return token_count < 7 or not has_focus
-    if intent == "role_targeting":
-        return not (has_role or has_company or has_job_description or has_focus)
-    if intent == "recruiter_pitch":
-        return not (has_role or has_company or has_focus)
-    return token_count < 6 or (
-        any(
-            phrase in query
-            for phrase in [
-                "summarize the candidate",
-                "tell me about the candidate",
-                "is this candidate good",
-                "why should we hire",
-                "screen this profile",
-            ]
-        )
-        and not (has_role or has_company or has_focus or has_job_description)
     )
