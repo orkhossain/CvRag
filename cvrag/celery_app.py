@@ -1,11 +1,11 @@
 from celery import Celery
 
-from .core.config import REDIS_URL
-
+# memory:// broker + cache+memory:// backend — no Redis or external process needed.
+# The worker runs embedded in the FastAPI process (see cvrag/main.py lifespan).
 celery_app = Celery(
     "cvrag",
-    broker=REDIS_URL,
-    backend=REDIS_URL,
+    broker="memory://",
+    backend="cache+memory://",
     include=["cvrag.distillation.tasks"],
 )
 
@@ -14,6 +14,7 @@ celery_app.conf.update(
     result_serializer="json",
     accept_content=["json"],
     task_track_started=True,
-    result_expires=86400,  # 24 hours
-    worker_prefetch_multiplier=1,
+    result_expires=86400,
+    worker_pool="threads",
+    worker_concurrency=2,
 )

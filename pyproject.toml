@@ -19,8 +19,7 @@ dependencies = [
     "python-dateutil",
     "torch",
     "langdetect",
-    "celery[redis]",
-    "redis",
+    "celery",
 ]
 
 [project.optional-dependencies]
@@ -41,3 +40,8 @@ dev-dependencies = [
     "pytest",
     "httpx",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

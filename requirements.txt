@@ -14,5 +14,4 @@ python-dateutil
 langchain_huggingface
 torch
 langdetect
-celery[redis]
-redis
+celery

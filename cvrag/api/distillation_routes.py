@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from celery.result import AsyncResult
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from ..celery_app import celery_app
 from ..core.security import guard
 from ..distillation.generator import DISTILLABLE_INTENTS, output_path
 from ..distillation.tasks import generate_distillation_data
@@ -75,16 +77,13 @@ def distillation_status(
 ):
     guard(authorization)
 
-    from celery.result import AsyncResult
-    from ..celery_app import celery_app
-
     result = AsyncResult(task_id, app=celery_app)
     state = result.state
 
     if state == "PENDING":
         return DistillStatusResponse(task_id=task_id, status="pending")
 
-    if state == "PROGRESS":
+    if state in ("STARTED", "PROGRESS"):
         meta = result.info or {}
         return DistillStatusResponse(
             task_id=task_id,
@@ -101,14 +100,11 @@ def distillation_status(
             total_examples=info.get("total_examples"),
         )
 
-    if state == "FAILURE":
-        return DistillStatusResponse(
-            task_id=task_id,
-            status="failed",
-            error=str(result.info),
-        )
-
-    return DistillStatusResponse(task_id=task_id, status=state.lower())
+    return DistillStatusResponse(
+        task_id=task_id,
+        status="failed",
+        error=str(result.info),
+    )
 
 
 @router.get("/download/{task_id}")
@@ -118,9 +114,13 @@ def download_distillation(
 ):
     guard(authorization)
 
+    result = AsyncResult(task_id, app=celery_app)
+    if result.state != "SUCCESS":
+        raise HTTPException(status_code=404, detail="File not ready — check /distill/status first")
+
     path = output_path(task_id)
     if not path.exists():
-        raise HTTPException(status_code=404, detail="File not ready or task_id unknown")
+        raise HTTPException(status_code=404, detail="Output file missing")
 
     return FileResponse(
         path=path,
