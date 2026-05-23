@@ -588,12 +588,6 @@ dependencies = [
     { name = "uvicorn" },
 ]
 
-[package.optional-dependencies]
-dev = [
-    { name = "httpx" },
-    { name = "pytest" },
-]
-
 [package.dev-dependencies]
 dev = [
     { name = "httpx" },
@@ -605,7 +599,6 @@ requires-dist = [
     { name = "celery" },
     { name = "faiss-cpu" },
     { name = "fastapi" },
-    { name = "httpx", marker = "extra == 'dev'" },
     { name = "langchain" },
     { name = "langchain-community" },
     { name = "langchain-groq" },
@@ -616,13 +609,11 @@ requires-dist = [
     { name = "langgraph" },
     { name = "pdfminer-six" },
     { name = "pydantic" },
-    { name = "pytest", marker = "extra == 'dev'" },
     { name = "python-dateutil" },
     { name = "sentence-transformers" },
     { name = "torch" },
     { name = "uvicorn" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [

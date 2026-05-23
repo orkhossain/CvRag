@@ -63,7 +63,7 @@ def should_clarify(
     retrieval_confidence: float | None = None,
     intent_confidence: float | None = None,
 ) -> bool:
-    if intent not in _RECRUITER_INTENTS:
+    if intent not in _RECRUITER_INTENTS and not _is_recruiter_like(query.lower(), intent):
         return False
 
     specificity = query_specificity_score(query)
