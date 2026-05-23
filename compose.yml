@@ -1,5 +1,16 @@
 
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   cvrag:
     build: .
     ports:
@@ -12,6 +23,11 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
       GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.1}
+      REDIS_URL: redis://redis:6379/0
+      TEACHER_MODEL: ${TEACHER_MODEL:-llama-3.3-70b-versatile}
+    depends_on:
+      redis:
+        condition: service_healthy
     develop:
       watch:
         - action: sync+restart
@@ -21,8 +37,37 @@ services:
           path: ./app.py
           target: /app/app.py
         - action: rebuild
-          path: ./requirements.txt
+          path: ./pyproject.toml
+          target: /app/pyproject.toml
         - action: rebuild
           path: ./Dockerfile
     volumes:
       - ./cv.pdf:/app/cv.pdf
+      - distill_output:/app/distillation_output
+
+  celery-worker:
+    build: .
+    command: >
+      uv run celery -A cvrag.celery_app worker
+      --loglevel=info
+      --concurrency=2
+      --queues=celery
+    env_file:
+      - .env
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.1}
+      REDIS_URL: redis://redis:6379/0
+      TEACHER_MODEL: ${TEACHER_MODEL:-llama-3.3-70b-versatile}
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./cv.pdf:/app/cv.pdf
+      - distill_output:/app/distillation_output
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  distill_output:

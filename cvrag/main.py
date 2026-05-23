@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .api.distillation_routes import router as distillation_router
 from .api.routes import router
 from .core.config import ALLOWED_ORIGINS, validate_env
 from .core.cv_data import ensure_cv_json
@@ -19,3 +20,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router)
+app.include_router(distillation_router)
