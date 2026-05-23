@@ -12,6 +12,7 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
       GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.1}
+      TEACHER_MODEL: ${TEACHER_MODEL:-llama-3.3-70b-versatile}
     develop:
       watch:
         - action: sync+restart
@@ -21,8 +22,13 @@ services:
           path: ./app.py
           target: /app/app.py
         - action: rebuild
-          path: ./requirements.txt
+          path: ./pyproject.toml
+          target: /app/pyproject.toml
         - action: rebuild
           path: ./Dockerfile
     volumes:
       - ./cv.pdf:/app/cv.pdf
+      - distill_output:/app/distillation_output
+
+volumes:
+  distill_output:

@@ -23,6 +23,12 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq").lower()
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.1"))
 
 
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+TEACHER_MODEL = os.getenv("TEACHER_MODEL", "llama-3.3-70b-versatile")
+DISTILL_OUTPUT_DIR = BASE_DIR / os.getenv("DISTILL_OUTPUT_DIR", "distillation_output")
+DISTILL_EXAMPLES_PER_INTENT = int(os.getenv("DISTILL_EXAMPLES_PER_INTENT", "5"))
+
+
 def _parse_soft_skills(raw: str) -> list[str]:
     if not raw:
         return []

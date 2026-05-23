@@ -1,0 +1,173 @@
+version: 2.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Executors
+# ─────────────────────────────────────────────────────────────────────────────
+executors:
+  python:
+    docker:
+      - image: cimg/python:3.11
+    resource_class: medium
+    environment:
+      UV_CACHE_DIR: /tmp/uv-cache
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reusable commands
+# ─────────────────────────────────────────────────────────────────────────────
+commands:
+  install-uv:
+    steps:
+      - run:
+          name: Install uv
+          command: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+
+  install-deps:
+    parameters:
+      dev:
+        type: boolean
+        default: false
+    steps:
+      - restore_cache:
+          keys:
+            - uv-v1-{{ checksum "uv.lock" }}
+            - uv-v1-
+      - run:
+          name: Install dependencies
+          command: |
+            uv sync --frozen <<# parameters.dev >>--dev<</ parameters.dev >><<^ parameters.dev >>--no-dev<</ parameters.dev >>
+      - save_cache:
+          key: uv-v1-{{ checksum "uv.lock" }}
+          paths:
+            - .venv
+            - /tmp/uv-cache
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Jobs
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+
+  # ── Unit tests ──────────────────────────────────────────────────────────────
+  test:
+    executor: python
+    steps:
+      - checkout
+      - install-uv
+      - install-deps:
+          dev: true
+      - run:
+          name: Run unit tests
+          command: |
+            uv run pytest tests/ \
+              --ignore=tests/evals \
+              -v \
+              --junit-xml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+
+  # ── Eval suite (no LLM required) ─────────────────────────────────────────
+  eval:
+    executor: python
+    steps:
+      - checkout
+      - install-uv
+      - install-deps
+      - run:
+          name: Intent eval
+          command: uv run python tests/evals/run_evals.py --suite intent
+      - run:
+          name: Clarification eval
+          command: uv run python tests/evals/run_evals.py --suite clarification
+      - run:
+          # PDFMinerLoader reads cv.pdf directly — no LLM needed here.
+          # Prints SKIP if CV is missing rather than failing.
+          name: Retrieval eval
+          command: uv run python tests/evals/run_evals.py --suite retrieval
+
+  # ── Distillation data generation (teacher LLM required) ──────────────────
+  distill:
+    executor: python
+    environment:
+      DISTILL_OUTPUT_DIR: distillation_output
+    steps:
+      - checkout
+      - install-uv
+      - install-deps
+      - run:
+          name: Generate teacher-labeled training data
+          command: |
+            uv run python scripts/generate_distillation_data.py \
+              --examples-per-intent "${DISTILL_EXAMPLES_PER_INTENT:-3}" \
+              --output distillation_output/train.jsonl
+          # Required secrets in CircleCI project settings:
+          #   GROQ_API_KEY — teacher LLM (llama-3.3-70b-versatile)
+      - run:
+          name: Validate output
+          command: |
+            count=$(wc -l < distillation_output/train.jsonl | tr -d ' ')
+            echo "Generated ${count} training examples"
+            [ "${count}" -gt 0 ] || { echo "ERROR: empty output"; exit 1; }
+      - store_artifacts:
+          path: distillation_output/train.jsonl
+          destination: distillation/train.jsonl
+      - run:
+          name: Print first example (preview)
+          command: head -n 1 distillation_output/train.jsonl | python3 -m json.tool
+
+  # ── Deploy to HF Spaces + GitHub ─────────────────────────────────────────
+  deploy:
+    executor: python
+    steps:
+      - checkout
+      - run:
+          name: Push to GitHub
+          command: |
+            git config user.email "ci@circleci.com"
+            git config user.name "CircleCI"
+            # GITHUB_TOKEN must be set in CircleCI project environment variables.
+            git remote set-url github \
+              "https://orkhossain:${GITHUB_TOKEN}@github.com/orkhossain/CvRag"
+            git push github main
+      - run:
+          name: Push to Hugging Face Spaces
+          command: |
+            # HF_TOKEN must be set in CircleCI project environment variables.
+            git remote set-url origin \
+              "https://Erik1998:${HF_TOKEN}@huggingface.co/spaces/Erik1998/CvRag"
+            git push origin main
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Workflows
+# ─────────────────────────────────────────────────────────────────────────────
+workflows:
+
+  # Runs on every push.
+  # On main: full gate → deploy.
+  # On feature branches: test + eval only.
+  ci-cd:
+    jobs:
+      - test
+      - eval:
+          requires: [test]
+      - deploy:
+          requires: [eval]
+          filters:
+            branches:
+              only: main
+
+  # Runs every Sunday at 02:00 UTC.
+  # Generates fresh teacher-labeled training data and stores as a CI artifact.
+  # Download from CircleCI UI → Artifacts tab → distillation/train.jsonl,
+  # then fine-tune a student model with HF TRL SFTTrainer.
+  weekly-distill:
+    triggers:
+      - schedule:
+          cron: "0 2 * * 0"
+          filters:
+            branches:
+              only: main
+    jobs:
+      - distill
