@@ -117,16 +117,23 @@ jobs:
           name: Print first example (preview)
           command: head -n 1 distillation_output/train.jsonl | python3 -m json.tool
 
-  # ── Deploy to HF Spaces ───────────────────────────────────────────────────
+  # ── Deploy to HF Spaces + GitHub ─────────────────────────────────────────
   deploy:
     executor: python
     steps:
       - checkout
       - run:
-          name: Push to Hugging Face Spaces
+          name: Push to GitHub
           command: |
             git config user.email "ci@circleci.com"
             git config user.name "CircleCI"
+            # GITHUB_TOKEN must be set in CircleCI project environment variables.
+            git remote set-url github \
+              "https://orkhossain:${GITHUB_TOKEN}@github.com/orkhossain/CvRag"
+            git push github main
+      - run:
+          name: Push to Hugging Face Spaces
+          command: |
             # HF_TOKEN must be set in CircleCI project environment variables.
             git remote set-url origin \
               "https://Erik1998:${HF_TOKEN}@huggingface.co/spaces/Erik1998/CvRag"
